@@ -13,17 +13,17 @@ import java.util.Set;
 @Entity
 public class Expert extends User {
 
-    private String specialization;
+    private String description;
 
     @OneToMany
     private Set<JobCategory> jobCategories;
 
-    public String getSpecialization() {
-        return specialization;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Set<JobCategory> getJobCategories() {
