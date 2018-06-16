@@ -5,7 +5,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.qubiz.server.service.UserRegister;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,6 +16,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,23 +27,23 @@ import java.util.Collections;
  # 16.06.2018 #
  ******************************
 */
+
 public class CustomFilter extends AbstractAuthenticationProcessingFilter {
 
     private AuthorizationCodeResourceDetails resourceServerProperties;
     private static final JacksonFactory jacksonFactory = new JacksonFactory();
     private static final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
 
-    @Autowired
     private UserRegister userRegister;
 
-
-    protected CustomFilter(AuthorizationCodeResourceDetails resourceServerProperties, String defaultFilterProcessesUrl) {
+    protected CustomFilter(AuthorizationCodeResourceDetails resourceServerProperties, String defaultFilterProcessesUrl, UserRegister userRegister) {
         super(defaultFilterProcessesUrl);
         this.resourceServerProperties = resourceServerProperties;
+        this.userRegister = userRegister;
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
 
         String token = request.getParameter("token");
 
@@ -70,15 +70,16 @@ public class CustomFilter extends AbstractAuthenticationProcessingFilter {
 
             GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_CLIENT");
 
-            if (request.getParameter("register").equals("client")) {
-                userRegister.registerClient(payload);
-            } else {
+            if ("expert".equals(request.getParameter("register"))) {
                 userRegister.registerExpert(payload);
                 grantedAuthority = new SimpleGrantedAuthority("ROLE_EXPERT");
+            } else {
+                userRegister.registerClient(payload);
             }
 
             authorities.add(grantedAuthority);
             response.setStatus(HttpServletResponse.SC_OK);
+            //TODO fix auto redirect to /
             return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
         }
         throw new BadCredentialsException("Token error");
