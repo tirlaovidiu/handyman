@@ -12,14 +12,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.filter.CompositeFilter;
 
 import javax.servlet.Filter;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  ******************************
@@ -31,27 +33,44 @@ import javax.servlet.Filter;
 @EnableOAuth2Client
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final OAuth2ClientContext oauth2ClientContext;
+
     @Autowired
-    OAuth2ClientContext oauth2ClientContext;
+    public WebSecurityConfig(OAuth2ClientContext oauth2ClientContext) {
+        this.oauth2ClientContext = oauth2ClientContext;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
+        http.csrf().disable();
         http
                 .antMatcher("/**").authorizeRequests()
-                .antMatchers("/", "/login**", "/error**").permitAll()
+                .antMatchers("/", "/login**", "/login/**", "/error**").permitAll()
                 .anyRequest().authenticated()
-                .and().addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class).exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler());
+                .and().addFilterBefore(ssoFilters(), BasicAuthenticationFilter.class)
+                .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler());
+
     }
 
-    private Filter ssoFilter() {
-        OAuth2ClientAuthenticationProcessingFilter googleFilter = new OAuth2ClientAuthenticationProcessingAndSavingFilter("/login/google");
-        OAuth2RestTemplate googleTemplate = new OAuth2RestTemplate(google(), oauth2ClientContext);
-        googleFilter.setRestTemplate(googleTemplate);
-        UserInfoTokenServices tokenServices = new UserInfoTokenServices(googleResource().getUserInfoUri(), google().getClientId());
-        tokenServices.setRestTemplate(googleTemplate);
-        googleFilter.setTokenServices(tokenServices);
-        return googleFilter;
+    private Filter ssoFilters() {
+        CompositeFilter filter = new CompositeFilter();
+        List<Filter> filters = new ArrayList<>();
+        filters.add(ssoFilter(google(), googleResource(), "/login/google"));
+        filters.add(new CustomFilter(google(), "/login/google/token"));
+        filter.setFilters(filters);
+        return filter;
+    }
+
+    private Filter ssoFilter(AuthorizationCodeResourceDetails client, ResourceServerProperties resourceServerProperties, String path) {
+
+        OAuth2ClientAuthenticationProcessingAndSavingFilter filter = new OAuth2ClientAuthenticationProcessingAndSavingFilter(path);
+        OAuth2RestTemplate template = new OAuth2RestTemplate(client, oauth2ClientContext);
+        filter.setRestTemplate(template);
+        UserInfoTokenServices tokenServices = new UserInfoTokenServices(
+                resourceServerProperties.getUserInfoUri(), client.getClientId());
+        tokenServices.setRestTemplate(template);
+        filter.setTokenServices(tokenServices);
+        return filter;
     }
 
     @Bean
@@ -73,4 +92,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         registration.setOrder(-100);
         return registration;
     }
+
 }
