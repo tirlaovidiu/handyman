@@ -30,6 +30,8 @@ public abstract class User {
     private String firstName;
     private String lastName;
 
+    private String userTokenId;
+
     public String getUsername() {
         return username;
     }
@@ -62,4 +64,19 @@ public abstract class User {
         this.lastName = lastName;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUserTokenId() {
+        return userTokenId;
+    }
+
+    public void setUserTokenId(String userTokenId) {
+        this.userTokenId = userTokenId;
+    }
 }
