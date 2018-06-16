@@ -1,5 +1,6 @@
 package com.qubiz.server.config;
 
+import com.qubiz.server.service.UserRegister;
 import com.qubiz.server.util.security.OAuth2ClientAuthenticationProcessingAndSavingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
@@ -34,10 +35,12 @@ import java.util.List;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final OAuth2ClientContext oauth2ClientContext;
+    private final UserRegister userRegister;
 
     @Autowired
-    public WebSecurityConfig(OAuth2ClientContext oauth2ClientContext) {
+    public WebSecurityConfig(OAuth2ClientContext oauth2ClientContext, UserRegister userRegister) {
         this.oauth2ClientContext = oauth2ClientContext;
+        this.userRegister = userRegister;
     }
 
     @Override
@@ -56,7 +59,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
         filters.add(ssoFilter(google(), googleResource(), "/login/google"));
-        filters.add(new CustomFilter(google(), "/login/google/token"));
+        filters.add(new CustomFilter(google(), "/login/google/token", userRegister));
         filter.setFilters(filters);
         return filter;
     }
