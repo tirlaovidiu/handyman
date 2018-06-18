@@ -8,6 +8,7 @@ import com.qubiz.server.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -53,9 +54,16 @@ public class UserRegister {
         Role newClientRole = role.orElseGet(Role::new);
         newClientRole.setRoleName("client");
 
-        Set<Role> userRoles = newClient.getRoles();
-        userRoles.add(newClientRole);
+        roleDao.save(newClientRole);
 
+        Set<Role> userRoles = newClient.getRoles();
+
+        if (userRoles != null) {
+            userRoles.add(newClientRole);
+        } else {
+            userRoles = new HashSet<>();
+            userRoles.add(newClientRole);
+        }
         newClient.setRoles(userRoles);
 
         userDao.save(newClient);
