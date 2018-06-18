@@ -66,7 +66,6 @@ public class CustomFilter extends AbstractAuthenticationProcessingFilter {
 
             UserDetails userDetails = new UserDetails();
             userDetails.setClientId(payload.getSubject());
-            userDetails.setEmail(payload.getEmail());
 
             GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_CLIENT");
 
@@ -80,6 +79,7 @@ public class CustomFilter extends AbstractAuthenticationProcessingFilter {
             authorities.add(grantedAuthority);
             response.setStatus(HttpServletResponse.SC_OK);
             //TODO fix auto redirect to /
+
             return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
         }
         throw new BadCredentialsException("Token error");
