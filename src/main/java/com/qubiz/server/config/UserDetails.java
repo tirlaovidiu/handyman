@@ -8,7 +8,6 @@ package com.qubiz.server.config;
 */
 public class UserDetails {
     private String clientId;
-    private String email;
 
     public String getClientId() {
         return clientId;
@@ -18,11 +17,4 @@ public class UserDetails {
         this.clientId = clientId;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }
