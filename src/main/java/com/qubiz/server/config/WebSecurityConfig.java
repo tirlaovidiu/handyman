@@ -1,22 +1,17 @@
 package com.qubiz.server.config;
 
 import com.qubiz.server.service.UserRegister;
-import com.qubiz.server.util.security.OAuth2ClientAuthenticationProcessingAndSavingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.filter.CompositeFilter;
 
@@ -34,12 +29,10 @@ import java.util.List;
 @EnableOAuth2Client
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final OAuth2ClientContext oauth2ClientContext;
     private final UserRegister userRegister;
 
     @Autowired
-    public WebSecurityConfig(OAuth2ClientContext oauth2ClientContext, UserRegister userRegister) {
-        this.oauth2ClientContext = oauth2ClientContext;
+    public WebSecurityConfig(UserRegister userRegister) {
         this.userRegister = userRegister;
     }
 
@@ -50,29 +43,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatcher("/**").authorizeRequests()
                 .antMatchers("/", "/login**", "/login/**", "/error**").permitAll()
                 .anyRequest().authenticated()
-                .and().addFilterBefore(ssoFilters(), BasicAuthenticationFilter.class)
-                .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler());
-
+                .and().addFilterBefore(ssoFilters(), BasicAuthenticationFilter.class);
     }
 
     private Filter ssoFilters() {
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
-        filters.add(ssoFilter(google(), googleResource(), "/login/google"));
         filters.add(new CustomFilter(google(), "/login/google/token", userRegister));
         filter.setFilters(filters);
-        return filter;
-    }
-
-    private Filter ssoFilter(AuthorizationCodeResourceDetails client, ResourceServerProperties resourceServerProperties, String path) {
-
-        OAuth2ClientAuthenticationProcessingAndSavingFilter filter = new OAuth2ClientAuthenticationProcessingAndSavingFilter(path);
-        OAuth2RestTemplate template = new OAuth2RestTemplate(client, oauth2ClientContext);
-        filter.setRestTemplate(template);
-        UserInfoTokenServices tokenServices = new UserInfoTokenServices(
-                resourceServerProperties.getUserInfoUri(), client.getClientId());
-        tokenServices.setRestTemplate(template);
-        filter.setTokenServices(tokenServices);
         return filter;
     }
 
