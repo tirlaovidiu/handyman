@@ -1,7 +1,5 @@
 package com.qubiz.server;
 
-import com.qubiz.server.dao.ClientDao;
-import com.qubiz.server.dao.ExpertDao;
 import com.qubiz.server.dao.JobAssignmentDao;
 import com.qubiz.server.dao.JobCategoryDao;
 import com.qubiz.server.dao.JobDao;
@@ -20,19 +18,15 @@ import org.springframework.stereotype.Component;
 public class CommandLineRunner implements org.springframework.boot.CommandLineRunner {
 
 
-    private final UserDao userDao;
-    private final ClientDao clientDao;
-    private final ExpertDao expertDao;
-    private final JobDao jobDao;
-    private final JobCategoryDao jobCategoryDao;
-    private final JobAssignmentDao jobAssignmentDao;
-    private final LocationDao locationDao;
+    private UserDao userDao;
+    private JobDao jobDao;
+    private JobCategoryDao jobCategoryDao;
+    private JobAssignmentDao jobAssignmentDao;
+    private LocationDao locationDao;
 
     @Autowired
-    public CommandLineRunner(UserDao userDao, ClientDao clientDao, ExpertDao expertDao, JobDao jobDao, JobCategoryDao jobCategoryDao, JobAssignmentDao jobAssignmentDao, LocationDao locationDao) {
+    public CommandLineRunner(UserDao userDao, JobDao jobDao, JobCategoryDao jobCategoryDao, JobAssignmentDao jobAssignmentDao, LocationDao locationDao) {
         this.userDao = userDao;
-        this.clientDao = clientDao;
-        this.expertDao = expertDao;
         this.jobDao = jobDao;
         this.jobCategoryDao = jobCategoryDao;
         this.jobAssignmentDao = jobAssignmentDao;
@@ -43,11 +37,30 @@ public class CommandLineRunner implements org.springframework.boot.CommandLineRu
     @Override
     public void run(String... args) {
 //        Client client = new Client();
-//        client.setUsername("username");
-//        client.setFirstName("firstName");
-//        client.setLastName("lastName");
-//        client.setPassword("password");
-//        client.setPaymentOption("paymentOption");
+//        client.setUsername("username2");
+//        client.setFirstName("firstName2");
+//        client.setLastName("lastName2");
+//        client.setPassword("password2");
+//        client.setPaymentOption("paymentOption2");
 //        clientDao.save(client);
+//        Optional<Expert> expert = expertDao.findById(2);
+//        expert.ifPresent(client -> {
+//            client.setDescription("description");
+//            expertDao.save(client);
+//
+//        });
+//        Optional<User> user = userDao.findById(2);
+//        user.ifPresent(user1 -> {
+//            Expert expert = new Expert();
+//            expert.setId(user1.getId());
+//            expert.setFirstName(user1.getFirstName());
+//            expert.setLastName(user1.getLastName());
+//            expert.setUsername(user1.getUsername());
+//            expert.setPassword(user1.getPassword());
+//            expert.setDescription("dsadsa");
+//
+//            expertDao.save(expert);
+//        });
+
     }
 }

@@ -5,8 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.OneToMany;
+import java.util.Set;
 
 /*
  ******************************
@@ -15,8 +15,7 @@ import javax.persistence.InheritanceType;
  ******************************
 */
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class User {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,6 +30,13 @@ public abstract class User {
     private String lastName;
 
     private String userTokenId;
+
+    @OneToMany
+    private Set<Role> roles;
+
+    private int paymentType;
+
+    private String expertDescription;
 
     public String getUsername() {
         return username;
@@ -64,12 +70,12 @@ public abstract class User {
         this.lastName = lastName;
     }
 
-    public int getId() {
-        return id;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public String getUserTokenId() {
@@ -78,5 +84,21 @@ public abstract class User {
 
     public void setUserTokenId(String userTokenId) {
         this.userTokenId = userTokenId;
+    }
+
+    public int getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(int paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public String getExpertDescription() {
+        return expertDescription;
+    }
+
+    public void setExpertDescription(String expertDescription) {
+        this.expertDescription = expertDescription;
     }
 }

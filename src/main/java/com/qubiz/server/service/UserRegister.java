@@ -1,14 +1,15 @@
 package com.qubiz.server.service;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.qubiz.server.dao.ClientDao;
-import com.qubiz.server.dao.ExpertDao;
-import com.qubiz.server.entity.Client;
-import com.qubiz.server.entity.Expert;
+import com.qubiz.server.dao.RoleDao;
+import com.qubiz.server.dao.UserDao;
+import com.qubiz.server.entity.Role;
+import com.qubiz.server.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 /*
  ******************************
@@ -19,19 +20,19 @@ import java.util.Optional;
 @Service
 public class UserRegister {
 
-    private final ClientDao clientDao;
-    private final ExpertDao expertDao;
+    private final UserDao userDao;
+    private RoleDao roleDao;
 
     @Autowired
-    public UserRegister(ClientDao clientDao, ExpertDao expertDao) {
-        this.clientDao = clientDao;
-        this.expertDao = expertDao;
+    public UserRegister(UserDao userDao, RoleDao roleDao) {
+        this.userDao = userDao;
+        this.roleDao = roleDao;
     }
 
 
     public void registerClient(GoogleIdToken.Payload payload) {
-        Optional<Client> client = clientDao.findClientByUserTokenId(payload.getSubject());
-        Client newClient = client.orElseGet(Client::new); // If is present, get and update details, or else create new
+        Optional<User> user = userDao.findUserByUserTokenId(payload.getSubject());
+        User newClient = user.orElseGet(User::new);
 
         String name = (String) payload.get("name");
         String email = payload.getEmail();
@@ -48,12 +49,21 @@ public class UserRegister {
         newClient.setLastName(familyName);
         newClient.setUserTokenId(userTokenId);
 
-        clientDao.save(newClient);
+        Optional<Role> role = roleDao.findRoleByRoleName("client");
+        Role newClientRole = role.orElseGet(Role::new);
+        newClientRole.setRoleName("client");
+
+        Set<Role> userRoles = newClient.getRoles();
+        userRoles.add(newClientRole);
+
+        newClient.setRoles(userRoles);
+
+        userDao.save(newClient);
     }
 
     public void registerExpert(GoogleIdToken.Payload payload) {
-        Optional<Expert> client = expertDao.findClientByUserTokenId(payload.getSubject());
-        Expert newExpert = client.orElseGet(Expert::new); // If is present, get and update details, or else create new
+        Optional<User> user = userDao.findUserByUserTokenId(payload.getSubject());
+        User newExpert = user.orElseGet(User::new);
 
         String name = (String) payload.get("name");
         String email = payload.getEmail();
@@ -70,6 +80,15 @@ public class UserRegister {
         newExpert.setLastName(familyName);
         newExpert.setUserTokenId(userTokenId);
 
-        expertDao.save(newExpert);
+        Optional<Role> role = roleDao.findRoleByRoleName("expert");
+        Role newExpertRole = role.orElseGet(Role::new);
+        newExpertRole.setRoleName("expert");
+
+        Set<Role> userRoles = newExpert.getRoles();
+        userRoles.add(newExpertRole);
+
+        newExpert.setRoles(userRoles);
+
+        userDao.save(newExpert);
     }
 }
