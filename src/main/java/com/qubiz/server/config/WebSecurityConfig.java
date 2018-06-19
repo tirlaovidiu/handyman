@@ -4,14 +4,11 @@ import com.qubiz.server.service.UserRegister;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.filter.CompositeFilter;
 
@@ -26,7 +23,6 @@ import java.util.List;
  ******************************
 */
 @Configuration
-@EnableOAuth2Client
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserRegister userRegister;
@@ -41,15 +37,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http
                 .antMatcher("/**").authorizeRequests()
-                .antMatchers("/", "/login**", "/login/**", "/error**").permitAll()
+                .antMatchers("/", "/login**", "/login/google/token", "/error**").permitAll()
                 .anyRequest().authenticated()
-                .and().addFilterBefore(ssoFilters(), BasicAuthenticationFilter.class);
+                .and().addFilterBefore(ssoFilters(), BasicAuthenticationFilter.class)
+                .exceptionHandling()
+                .and().logout().logoutUrl("/logout");
     }
 
     private Filter ssoFilters() {
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
-        filters.add(new CustomFilter(google(), "/login/google/token", userRegister));
+        filters.add(new LoginFilter(google(), "/login/google/token", userRegister));
         filter.setFilters(filters);
         return filter;
     }
@@ -64,14 +62,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @ConfigurationProperties("google.resource")
     public ResourceServerProperties googleResource() {
         return new ResourceServerProperties();
-    }
-
-    @Bean
-    public FilterRegistrationBean oauth2ClientFilterRegistration(OAuth2ClientContextFilter filter) {
-        FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(filter);
-        registration.setOrder(-100);
-        return registration;
     }
 
 }

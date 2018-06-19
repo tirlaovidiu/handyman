@@ -28,7 +28,7 @@ import java.util.Collections;
  ******************************
 */
 
-public class CustomFilter extends AbstractAuthenticationProcessingFilter {
+public class LoginFilter extends AbstractAuthenticationProcessingFilter {
 
     private AuthorizationCodeResourceDetails resourceServerProperties;
     private static final JacksonFactory jacksonFactory = new JacksonFactory();
@@ -36,7 +36,7 @@ public class CustomFilter extends AbstractAuthenticationProcessingFilter {
 
     private UserRegister userRegister;
 
-    protected CustomFilter(AuthorizationCodeResourceDetails resourceServerProperties, String defaultFilterProcessesUrl, UserRegister userRegister) {
+    protected LoginFilter(AuthorizationCodeResourceDetails resourceServerProperties, String defaultFilterProcessesUrl, UserRegister userRegister) {
         super(defaultFilterProcessesUrl);
         this.resourceServerProperties = resourceServerProperties;
         this.userRegister = userRegister;
@@ -50,8 +50,6 @@ public class CustomFilter extends AbstractAuthenticationProcessingFilter {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(httpTransport, jacksonFactory)
                 // Specify the CLIENT_ID of the app that accesses the backend:
                 .setAudience(Collections.singletonList(resourceServerProperties.getClientId()))
-                // Or, if multiple clients access the backend:
-//                .setAudience(Arrays.asList(resourceServerProperties.getClientId(), "641526525870-3sni1poiuimvhht8o4ira0hq1jv0f52p.apps.googleusercontent.com"))
                 .build();
 
         GoogleIdToken idToken;
@@ -70,18 +68,20 @@ public class CustomFilter extends AbstractAuthenticationProcessingFilter {
             GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_CLIENT");
 
             if ("expert".equals(request.getParameter("register"))) {
-                userRegister.registerExpert(payload);
+                userRegister.registerClient(payload, "expert");
                 grantedAuthority = new SimpleGrantedAuthority("ROLE_EXPERT");
             } else {
-                userRegister.registerClient(payload);
+                userRegister.registerClient(payload, "client");
             }
 
             authorities.add(grantedAuthority);
             response.setStatus(HttpServletResponse.SC_OK);
-            //TODO fix auto redirect to /
+
+            this.setAuthenticationSuccessHandler(new SuccessAuthenticationHandler());
 
             return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
         }
         throw new BadCredentialsException("Token error");
     }
+
 }
