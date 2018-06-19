@@ -2,10 +2,12 @@ package com.qubiz.server.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
+import java.util.HashSet;
 import java.util.Set;
 
 /*
@@ -18,7 +20,7 @@ import java.util.Set;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(nullable = false, unique = true)
@@ -29,10 +31,11 @@ public class User {
     private String firstName;
     private String lastName;
 
+    @Column(nullable = false, unique = true)
     private String userTokenId;
 
-    @OneToMany
-    private Set<Role> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles = new HashSet<>();
 
     private int paymentType;
 

@@ -16,11 +16,11 @@ import java.util.Date;
 @Entity
 public class Job {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
-    private Client client;
+    private User client;
 
     @ManyToOne
     private JobCategory jobCategory;
@@ -31,11 +31,11 @@ public class Job {
     @ManyToOne
     private Location location;
 
-    public Client getClient() {
+    public User getClient() {
         return client;
     }
 
-    public void setClient(Client client) {
+    public void setClient(User client) {
         this.client = client;
     }
 

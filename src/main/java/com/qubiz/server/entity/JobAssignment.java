@@ -18,13 +18,13 @@ import javax.persistence.OneToOne;
 @Entity
 public class JobAssignment {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private double price;
 
     @OneToOne
-    private Expert expert;
+    private User expert;
 
     private JobStatus status;
 
@@ -40,11 +40,11 @@ public class JobAssignment {
         this.price = price;
     }
 
-    public Expert getExpert() {
+    public User getExpert() {
         return expert;
     }
 
-    public void setExpert(Expert expert) {
+    public void setExpert(User expert) {
         this.expert = expert;
     }
 

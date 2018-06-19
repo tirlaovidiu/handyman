@@ -8,10 +8,9 @@ import java.util.Optional;
 /*
  ******************************
  # Created by Tirla Ovidiu #
- # 18.06.2018 #
+ # 19.06.2018 #
  ******************************
 */
 public interface RoleDao extends JpaRepository<Role, Integer> {
-
     Optional<Role> findRoleByRoleName(String roleName);
 }

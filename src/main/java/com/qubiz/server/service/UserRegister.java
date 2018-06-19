@@ -8,7 +8,6 @@ import com.qubiz.server.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,8 +29,7 @@ public class UserRegister {
         this.roleDao = roleDao;
     }
 
-
-    public void registerClient(GoogleIdToken.Payload payload) {
+    public void registerClient(GoogleIdToken.Payload payload, String roleName) {
         Optional<User> user = userDao.findUserByUserTokenId(payload.getSubject());
         User newClient = user.orElseGet(User::new);
 
@@ -50,53 +48,19 @@ public class UserRegister {
         newClient.setLastName(familyName);
         newClient.setUserTokenId(userTokenId);
 
-        Optional<Role> role = roleDao.findRoleByRoleName("client");
-        Role newClientRole = role.orElseGet(Role::new);
-        newClientRole.setRoleName("client");
-
-        roleDao.save(newClientRole);
-
+        Optional<Role> clientRole = roleDao.findRoleByRoleName(roleName);
         Set<Role> userRoles = newClient.getRoles();
 
-        if (userRoles != null) {
-            userRoles.add(newClientRole);
+        if (clientRole.isPresent()) {
+            userRoles.add(clientRole.get());
         } else {
-            userRoles = new HashSet<>();
-            userRoles.add(newClientRole);
+            Role newClientRole = new Role();
+            newClientRole.setRoleName(roleName);
+            userRoles.add(roleDao.save(newClientRole));
         }
         newClient.setRoles(userRoles);
 
         userDao.save(newClient);
     }
 
-    public void registerExpert(GoogleIdToken.Payload payload) {
-        Optional<User> user = userDao.findUserByUserTokenId(payload.getSubject());
-        User newExpert = user.orElseGet(User::new);
-
-        String name = (String) payload.get("name");
-        String email = payload.getEmail();
-        String pictureUrl = (String) payload.get("picture");
-        String locale = (String) payload.get("locale");
-        String familyName = (String) payload.get("family_name");
-        String givenName = (String) payload.get("given_name");
-        String userTokenId = payload.getSubject();
-
-        //TODO make a validator
-
-        newExpert.setUsername(name);
-        newExpert.setFirstName(givenName);
-        newExpert.setLastName(familyName);
-        newExpert.setUserTokenId(userTokenId);
-
-        Optional<Role> role = roleDao.findRoleByRoleName("expert");
-        Role newExpertRole = role.orElseGet(Role::new);
-        newExpertRole.setRoleName("expert");
-
-        Set<Role> userRoles = newExpert.getRoles();
-        userRoles.add(newExpertRole);
-
-        newExpert.setRoles(userRoles);
-
-        userDao.save(newExpert);
-    }
 }
