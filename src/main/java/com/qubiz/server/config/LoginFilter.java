@@ -5,7 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.qubiz.server.error.TokenIntegrityException;
-import com.qubiz.server.service.AuthenticateUser;
+import com.qubiz.server.service.AuthenticationUserService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -29,11 +29,11 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
     private static final JacksonFactory jacksonFactory = new JacksonFactory();
     private static final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
 
-    private AuthenticateUser authenticateUser;
+    private AuthenticationUserService authenticationUserService;
 
-    LoginFilter(String defaultFilterProcessesUrl, AuthenticateUser authenticateUser) {
+    LoginFilter(String defaultFilterProcessesUrl, AuthenticationUserService authenticationUserService) {
         super(defaultFilterProcessesUrl);
-        this.authenticateUser = authenticateUser;
+        this.authenticationUserService = authenticationUserService;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         } catch (Exception e) {
             throw new TokenIntegrityException("Could not obtain user details from token", e);
         }
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = authenticateUser.authenticate(idToken);
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = authenticationUserService.authenticate(idToken);
 
         response.setStatus(HttpServletResponse.SC_OK);
 

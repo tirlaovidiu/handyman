@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  ******************************
 */
 @Service
-public class AuthenticateUser {
+public class AuthenticationUserService {
 
     private static final String CLIENT_ROLE_NAME = "CLIENT";
     private final UserDao userDao;
@@ -39,7 +39,7 @@ public class AuthenticateUser {
     private static Logger logger = Logger.getLogger("AuthenticateUser");
 
     @Autowired
-    public AuthenticateUser(UserDao userDao, RoleDao roleDao) {
+    public AuthenticationUserService(UserDao userDao, RoleDao roleDao) {
         this.userDao = userDao;
         this.roleDao = roleDao;
     }

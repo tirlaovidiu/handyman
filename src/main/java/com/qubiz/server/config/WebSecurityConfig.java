@@ -1,6 +1,6 @@
 package com.qubiz.server.config;
 
-import com.qubiz.server.service.AuthenticateUser;
+import com.qubiz.server.service.AuthenticationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,11 +21,11 @@ import java.util.List;
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final AuthenticateUser authenticateUser;
+    private final AuthenticationUserService authenticationUserService;
 
     @Autowired
-    public WebSecurityConfig(AuthenticateUser authenticateUser) {
-        this.authenticateUser = authenticateUser;
+    public WebSecurityConfig(AuthenticationUserService authenticationUserService) {
+        this.authenticationUserService = authenticationUserService;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private Filter ssoFilters() {
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
-        filters.add(new LoginFilter("/login/google/token", authenticateUser));
+        filters.add(new LoginFilter("/login/google/token", authenticationUserService));
         filter.setFilters(filters);
         return filter;
     }
