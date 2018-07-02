@@ -4,22 +4,18 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.qubiz.server.service.UserRegister;
-import org.springframework.security.authentication.BadCredentialsException;
+import com.qubiz.server.error.TokenIntegrityException;
+import com.qubiz.server.service.AuthenticateUser;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+
+import static com.qubiz.server.util.Constants.GOOGLE_API_KEY;
 
 /*
  ******************************
@@ -30,58 +26,42 @@ import java.util.Collections;
 
 public class LoginFilter extends AbstractAuthenticationProcessingFilter {
 
-    private AuthorizationCodeResourceDetails resourceServerProperties;
     private static final JacksonFactory jacksonFactory = new JacksonFactory();
     private static final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
 
-    private UserRegister userRegister;
+    private AuthenticateUser authenticateUser;
 
-    protected LoginFilter(AuthorizationCodeResourceDetails resourceServerProperties, String defaultFilterProcessesUrl, UserRegister userRegister) {
+    LoginFilter(String defaultFilterProcessesUrl, AuthenticateUser authenticateUser) {
         super(defaultFilterProcessesUrl);
-        this.resourceServerProperties = resourceServerProperties;
-        this.userRegister = userRegister;
+        this.authenticateUser = authenticateUser;
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         String token = request.getParameter("token");
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(httpTransport, jacksonFactory)
                 // Specify the CLIENT_ID of the app that accesses the backend:
-                .setAudience(Collections.singletonList(resourceServerProperties.getClientId()))
+                .setAudience(Collections.singleton(GOOGLE_API_KEY))
                 .build();
 
         GoogleIdToken idToken;
         try {
             idToken = verifier.verify(token);
-        } catch (Exception e) {
-            throw new BadCredentialsException("Could not obtain user details from token", e);
-        }
-        if (idToken != null) {
-            Collection<GrantedAuthority> authorities = new ArrayList<>();
-            GoogleIdToken.Payload payload = idToken.getPayload();
-
-            UserDetails userDetails = new UserDetails();
-            userDetails.setClientId(payload.getSubject());
-
-            GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_CLIENT");
-
-            if ("expert".equals(request.getParameter("register"))) {
-                userRegister.registerClient(payload, "expert");
-                grantedAuthority = new SimpleGrantedAuthority("ROLE_EXPERT");
-            } else {
-                userRegister.registerClient(payload, "client");
+            if (idToken == null) {
+                throw new TokenIntegrityException("Google token error");
             }
-
-            authorities.add(grantedAuthority);
-            response.setStatus(HttpServletResponse.SC_OK);
-
-            this.setAuthenticationSuccessHandler(new SuccessAuthenticationHandler());
-
-            return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+        } catch (Exception e) {
+            throw new TokenIntegrityException("Could not obtain user details from token", e);
         }
-        throw new BadCredentialsException("Token error");
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = authenticateUser.authenticate(idToken);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        this.setAuthenticationSuccessHandler(new SuccessAuthenticationHandler());
+
+        return usernamePasswordAuthenticationToken;
     }
 
 }

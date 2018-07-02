@@ -7,13 +7,13 @@ package com.qubiz.server.config;
  ******************************
 */
 public class UserDetails {
-    private String clientId;
+    private int clientId;
 
-    public String getClientId() {
+    public int getClientId() {
         return clientId;
     }
 
-    public void setClientId(String clientId) {
+    public void setClientId(int clientId) {
         this.clientId = clientId;
     }
 

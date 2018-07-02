@@ -1,14 +1,10 @@
 package com.qubiz.server.config;
 
-import com.qubiz.server.service.UserRegister;
+import com.qubiz.server.service.AuthenticateUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.filter.CompositeFilter;
 
@@ -25,11 +21,11 @@ import java.util.List;
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserRegister userRegister;
+    private final AuthenticateUser authenticateUser;
 
     @Autowired
-    public WebSecurityConfig(UserRegister userRegister) {
-        this.userRegister = userRegister;
+    public WebSecurityConfig(AuthenticateUser authenticateUser) {
+        this.authenticateUser = authenticateUser;
     }
 
     @Override
@@ -47,21 +43,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private Filter ssoFilters() {
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
-        filters.add(new LoginFilter(google(), "/login/google/token", userRegister));
+        filters.add(new LoginFilter("/login/google/token", authenticateUser));
         filter.setFilters(filters);
         return filter;
-    }
-
-    @Bean
-    @ConfigurationProperties("google.client")
-    public AuthorizationCodeResourceDetails google() {
-        return new AuthorizationCodeResourceDetails();
-    }
-
-    @Bean
-    @ConfigurationProperties("google.resource")
-    public ResourceServerProperties googleResource() {
-        return new ResourceServerProperties();
     }
 
 }

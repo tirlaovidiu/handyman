@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +37,8 @@ public class User {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles = new HashSet<>();
+
+    private URI profilePictureUrl;
 
     private int paymentType;
 
@@ -77,6 +80,14 @@ public class User {
         return roles;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
@@ -103,5 +114,13 @@ public class User {
 
     public void setExpertDescription(String expertDescription) {
         this.expertDescription = expertDescription;
+    }
+
+    public URI getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(URI profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
     }
 }
