@@ -1,4 +1,4 @@
-package com.qubiz.server.error;
+package com.qubiz.server.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

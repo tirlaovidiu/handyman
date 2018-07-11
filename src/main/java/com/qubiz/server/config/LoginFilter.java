@@ -4,7 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.qubiz.server.error.TokenIntegrityException;
+import com.qubiz.server.exception.TokenIntegrityException;
 import com.qubiz.server.service.AuthenticationUserService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -38,6 +38,7 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        this.setAuthenticationFailureHandler(new FailureAuthenticationHandler());
 
         String token = request.getParameter("token");
 
@@ -50,10 +51,10 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         try {
             idToken = verifier.verify(token);
             if (idToken == null) {
-                throw new TokenIntegrityException("Google token error");
+                throw new TokenIntegrityException("Token exception");
             }
         } catch (Exception e) {
-            throw new TokenIntegrityException("Could not obtain user details from token", e);
+            throw new TokenIntegrityException("Bad token", e);
         }
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = authenticationUserService.authenticate(idToken);
 
