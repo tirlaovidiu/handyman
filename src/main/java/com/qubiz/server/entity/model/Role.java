@@ -1,4 +1,4 @@
-package com.qubiz.server.entity;
+package com.qubiz.server.entity.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +21,17 @@ public class Role {
 
     @Column(unique = true, nullable = false)
     private String roleName;
+
+    public Role() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getRoleName() {
         return roleName;

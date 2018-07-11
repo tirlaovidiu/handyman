@@ -1,4 +1,6 @@
-package com.qubiz.server.entity;
+package com.qubiz.server.entity.model;
+
+import com.qubiz.server.entity.JobStatus;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,6 +32,19 @@ public class Job {
 
     @ManyToOne
     private Location location;
+
+    private JobStatus jobStatus;
+
+    public Job() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public User getClient() {
         return client;
@@ -69,5 +84,13 @@ public class Job {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public JobStatus getJobStatus() {
+        return jobStatus;
+    }
+
+    public void setJobStatus(JobStatus jobStatus) {
+        this.jobStatus = jobStatus;
     }
 }

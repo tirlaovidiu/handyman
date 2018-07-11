@@ -1,6 +1,7 @@
-package com.qubiz.server.entity;
+package com.qubiz.server.entity.model;
 
-import com.qubiz.server.util.JobStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.qubiz.server.entity.JobAssignmentStatus;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,11 +27,27 @@ public class JobAssignment {
     @OneToOne
     private User expert;
 
-    private JobStatus status;
+    private JobAssignmentStatus assignmentStatus;
 
     @ManyToOne
+    @JsonIgnore
     private Job job;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Job getJob() {
+        return job;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
+    }
 
     public double getPrice() {
         return price;
@@ -48,11 +65,11 @@ public class JobAssignment {
         this.expert = expert;
     }
 
-    public JobStatus getStatus() {
-        return status;
+    public JobAssignmentStatus getAssignmentStatus() {
+        return assignmentStatus;
     }
 
-    public void setStatus(JobStatus status) {
-        this.status = status;
+    public void setAssignmentStatus(JobAssignmentStatus assignmentStatus) {
+        this.assignmentStatus = assignmentStatus;
     }
 }

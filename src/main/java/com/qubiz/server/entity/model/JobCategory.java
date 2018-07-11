@@ -1,4 +1,4 @@
-package com.qubiz.server.entity;
+package com.qubiz.server.entity.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +21,14 @@ public class JobCategory {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

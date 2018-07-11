@@ -1,4 +1,4 @@
-package com.qubiz.server.entity;
+package com.qubiz.server.entity.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -1,15 +1,14 @@
-package com.qubiz.server.util;
+package com.qubiz.server.entity;
 
 /*
  ******************************
  # Created by Tirla Ovidiu #
- # 07.06.2018 #
+ # 07.07.2018 #
  ******************************
 */
 public enum JobStatus {
-    NEW,
     IN_PROGRESS,
-    CANCELLED,
     COMPLETED,
-    PROPOSED
+    DELETED,
+    WAITING_FOR_EXPERT
 }
