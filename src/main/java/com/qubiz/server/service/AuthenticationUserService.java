@@ -2,10 +2,10 @@ package com.qubiz.server.service;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.qubiz.server.config.UserDetails;
-import com.qubiz.server.dao.RoleDao;
-import com.qubiz.server.dao.UserDao;
-import com.qubiz.server.entity.Role;
-import com.qubiz.server.entity.User;
+import com.qubiz.server.repository.RoleDao;
+import com.qubiz.server.repository.UserDao;
+import com.qubiz.server.entity.model.Role;
+import com.qubiz.server.entity.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

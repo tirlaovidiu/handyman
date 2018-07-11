@@ -1,6 +1,6 @@
-package com.qubiz.server.dao;
+package com.qubiz.server.repository;
 
-import com.qubiz.server.entity.JobCategory;
+import com.qubiz.server.entity.model.Location;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /*
@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  # 12.06.2018 #
  ******************************
 */
-public interface JobCategoryDao extends JpaRepository<JobCategory, Integer> {
+public interface LocationDao extends JpaRepository<Location, Integer> {
 }

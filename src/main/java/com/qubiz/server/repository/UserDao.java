@@ -1,8 +1,10 @@
-package com.qubiz.server.dao;
+package com.qubiz.server.repository;
 
-import com.qubiz.server.entity.User;
+import com.qubiz.server.entity.model.Role;
+import com.qubiz.server.entity.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /*
@@ -17,4 +19,5 @@ public interface UserDao extends JpaRepository<User, Integer> {
 
     Optional<User> findUserByUserTokenId(String userTokenId);
 
+    List<User> findUsersByRoles(Role role);
 }

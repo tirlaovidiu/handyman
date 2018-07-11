@@ -16,7 +16,8 @@ public class HelloController {
     @RequestMapping("/hello")
     public String hello() {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return principal.getClientId();
+        throw new IllegalArgumentException("test your ability");
+//        return String.valueOf(principal.getClientId());
     }
 
 
