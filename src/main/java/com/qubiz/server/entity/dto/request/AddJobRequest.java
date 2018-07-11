@@ -2,7 +2,7 @@ package com.qubiz.server.entity.dto.request;
 
 import com.qubiz.server.entity.dto.LocationDto;
 
-import java.util.Date;
+import java.util.Calendar;
 
 /*
  ******************************
@@ -13,13 +13,13 @@ import java.util.Date;
 public class AddJobRequest {
     private int jobCategoryId;
     private String description;
-    private Date arrivalDate;
+    private Calendar arrivalDate;
     private LocationDto location;
 
     public AddJobRequest() {
     }
 
-    public AddJobRequest(int jobCategoryId, String description, Date arrivalDate, LocationDto location) {
+    public AddJobRequest(int jobCategoryId, String description, Calendar arrivalDate, LocationDto location) {
         this.jobCategoryId = jobCategoryId;
         this.description = description;
         this.arrivalDate = arrivalDate;
@@ -42,11 +42,11 @@ public class AddJobRequest {
         this.description = description;
     }
 
-    public Date getArrivalDate() {
+    public Calendar getArrivalDate() {
         return arrivalDate;
     }
 
-    public void setArrivalDate(Date arrivalDate) {
+    public void setArrivalDate(Calendar arrivalDate) {
         this.arrivalDate = arrivalDate;
     }
 

@@ -4,7 +4,7 @@ import com.qubiz.server.entity.JobStatus;
 import com.qubiz.server.entity.dto.LocationDto;
 import com.qubiz.server.entity.dto.UserProfileDto;
 
-import java.util.Date;
+import java.util.Calendar;
 
 /*
  ******************************
@@ -17,7 +17,7 @@ public class JobResponse {
     private UserProfileDto clientProfile;
     private JobCategoryResponse jobCategory;
     private String jobDescription;
-    private Date arrivalDate;
+    private Calendar arrivalDate;
     private LocationDto jobLocation;
     private JobStatus jobStatus;
 
@@ -56,11 +56,11 @@ public class JobResponse {
         this.jobDescription = jobDescription;
     }
 
-    public Date getArrivalDate() {
+    public Calendar getArrivalDate() {
         return arrivalDate;
     }
 
-    public void setArrivalDate(Date arrivalDate) {
+    public void setArrivalDate(Calendar arrivalDate) {
         this.arrivalDate = arrivalDate;
     }
 

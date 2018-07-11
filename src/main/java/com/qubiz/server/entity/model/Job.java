@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import java.util.Date;
+import java.util.Calendar;
 
 /*
  ******************************
@@ -28,7 +28,7 @@ public class Job {
     private JobCategory jobCategory;
 
     private String description;
-    private Date arrivalDate;
+    private Calendar arrivalDate;
 
     @ManyToOne
     private Location location;
@@ -70,11 +70,11 @@ public class Job {
         this.description = description;
     }
 
-    public Date getArrivalDate() {
+    public Calendar getArrivalDate() {
         return arrivalDate;
     }
 
-    public void setArrivalDate(Date arrivalDate) {
+    public void setArrivalDate(Calendar arrivalDate) {
         this.arrivalDate = arrivalDate;
     }
 
