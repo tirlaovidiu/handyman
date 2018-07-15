@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import java.net.URI;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +24,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    private long timeStamp = Calendar.getInstance().getTimeInMillis();
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -122,5 +125,9 @@ public class User {
 
     public void setProfilePictureUrl(URI profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
     }
 }

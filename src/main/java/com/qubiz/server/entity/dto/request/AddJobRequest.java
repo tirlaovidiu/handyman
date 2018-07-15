@@ -2,8 +2,6 @@ package com.qubiz.server.entity.dto.request;
 
 import com.qubiz.server.entity.dto.LocationDto;
 
-import java.util.Calendar;
-
 /*
  ******************************
  # Created by Tirla Ovidiu #
@@ -13,13 +11,13 @@ import java.util.Calendar;
 public class AddJobRequest {
     private int jobCategoryId;
     private String description;
-    private Calendar arrivalDate;
+    private long arrivalDate;
     private LocationDto location;
 
     public AddJobRequest() {
     }
 
-    public AddJobRequest(int jobCategoryId, String description, Calendar arrivalDate, LocationDto location) {
+    public AddJobRequest(int jobCategoryId, String description, long arrivalDate, LocationDto location) {
         this.jobCategoryId = jobCategoryId;
         this.description = description;
         this.arrivalDate = arrivalDate;
@@ -42,11 +40,11 @@ public class AddJobRequest {
         this.description = description;
     }
 
-    public Calendar getArrivalDate() {
+    public long getArrivalDate() {
         return arrivalDate;
     }
 
-    public void setArrivalDate(Calendar arrivalDate) {
+    public void setArrivalDate(long arrivalDate) {
         this.arrivalDate = arrivalDate;
     }
 

@@ -1,10 +1,10 @@
 package com.qubiz.server.controller;
 
 import com.qubiz.server.config.UserDetails;
-import com.qubiz.server.entity.model.Job;
-import com.qubiz.server.service.JobService;
 import com.qubiz.server.entity.dto.request.AddJobRequest;
 import com.qubiz.server.entity.dto.response.ClientJobResponse;
+import com.qubiz.server.entity.dto.response.JobResponse;
+import com.qubiz.server.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,15 +45,15 @@ public class ClientController {
     @PostMapping("/jobs")
     public ResponseEntity addJob(@RequestBody AddJobRequest jobRequest) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Job job = jobService.addJob(userDetails.getClientId(), jobRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(job);
+        JobResponse jobResponse = jobService.addJob(userDetails.getClientId(), jobRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(jobResponse);
     }
 
     @GetMapping("/jobs")
     public ResponseEntity getJobs() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<Job> jobs = jobService.getJobs(userDetails.getClientId());
-        return ResponseEntity.status(HttpStatus.OK).body(jobs);
+        List<ClientJobResponse> jobResponses = jobService.getJobs(userDetails.getClientId());
+        return ResponseEntity.status(HttpStatus.OK).body(jobResponses);
     }
 
     @PostMapping("/jobs/{jobId}/assignments/{assignmentId}")

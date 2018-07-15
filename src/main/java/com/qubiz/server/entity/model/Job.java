@@ -2,6 +2,7 @@ package com.qubiz.server.entity.model;
 
 import com.qubiz.server.entity.JobStatus;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -21,6 +22,8 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    private long timeStamp = Calendar.getInstance().getTimeInMillis();
+
     @ManyToOne
     private User client;
 
@@ -28,9 +31,10 @@ public class Job {
     private JobCategory jobCategory;
 
     private String description;
-    private Calendar arrivalDate;
 
-    @ManyToOne
+    private long arrivalDate;
+
+    @ManyToOne(cascade = CascadeType.ALL)
     private Location location;
 
     private JobStatus jobStatus;
@@ -70,11 +74,11 @@ public class Job {
         this.description = description;
     }
 
-    public Calendar getArrivalDate() {
+    public long getArrivalDate() {
         return arrivalDate;
     }
 
-    public void setArrivalDate(Calendar arrivalDate) {
+    public void setArrivalDate(long arrivalDate) {
         this.arrivalDate = arrivalDate;
     }
 
@@ -92,5 +96,9 @@ public class Job {
 
     public void setJobStatus(JobStatus jobStatus) {
         this.jobStatus = jobStatus;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
     }
 }

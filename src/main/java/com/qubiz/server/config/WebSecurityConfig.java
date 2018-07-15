@@ -3,8 +3,10 @@ package com.qubiz.server.config;
 import com.qubiz.server.service.AuthenticationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.filter.CompositeFilter;
 
@@ -36,7 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/login**", "/login/google/token", "/error**").permitAll()
                 .anyRequest().authenticated()
                 .and().addFilterBefore(ssoFilters(), BasicAuthenticationFilter.class)
-                .exceptionHandling()
+                .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 .and().logout().logoutUrl("/logout");
     }
 

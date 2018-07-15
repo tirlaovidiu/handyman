@@ -73,7 +73,7 @@ public class JobService {
     }
 
     @Transactional
-    public Job addJob(int clientId, AddJobRequest jobRequest) {
+    public JobResponse addJob(int clientId, AddJobRequest jobRequest) {
         //TODO validate jobRequest
         Optional<User> user = userDao.findById(clientId);
         user.orElseThrow(() -> new BadAuthenticationException("No user match for your session"));
@@ -84,15 +84,16 @@ public class JobService {
         Job job = mapperFacade.map(jobRequest, Job.class);
         job.setClient(user.get());
         job.setJobCategory(category.get());
+        job.setJobStatus(JobStatus.IN_PROGRESS);
 
-        return jobDao.save(job);
+        return mapperFacade.map(jobDao.save(job), JobResponse.class);
     }
 
-    public List<Job> getJobs(int clientId) {
+    public List<ClientJobResponse> getJobs(int clientId) {
         Optional<User> user = userDao.findById(clientId);
         user.orElseThrow(() -> new BadAuthenticationException("No user match for your session"));
 
-        return jobDao.findJobsByClient(user.get());
+        return mapperFacade.mapAsList(jobDao.findJobsByClient(user.get()), ClientJobResponse.class);
     }
 
     public List<JobResponse> getJobsByCoordinates(double latitude, double longitude, double distance, int page, int pageSize) {
