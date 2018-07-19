@@ -9,6 +9,7 @@ import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -47,6 +48,7 @@ public class UserService {
         throw new HttpHandyManException("No user found", HttpStatus.NOT_FOUND.value());
     }
 
+    @Transactional
     public void updateProfile(int clientId, UserProfileDto userProfileDto) {
         Optional<User> user = userDao.findById(clientId);
         if (!user.isPresent()) {
@@ -56,7 +58,7 @@ public class UserService {
             throw new HttpHandyManException("You don't have permission to modify this user", HttpStatus.FORBIDDEN.value());
         }
 
-        //TODO validate userProfileDto
+        //TODO validate userProfileDto before update
         User modifiedUser = user.get();
         modifiedUser.setUsername(userProfileDto.getUsername());
         modifiedUser.setFirstName(userProfileDto.getFirstName());
