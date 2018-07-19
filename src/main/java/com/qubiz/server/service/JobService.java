@@ -16,6 +16,7 @@ import com.qubiz.server.exception.HttpHandyManException;
 import com.qubiz.server.repository.JobAssignmentDao;
 import com.qubiz.server.repository.JobCategoryDao;
 import com.qubiz.server.repository.JobDao;
+import com.qubiz.server.repository.LocationDao;
 import com.qubiz.server.repository.UserDao;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,14 +48,16 @@ public class JobService {
     private final JobAssignmentDao assignmentDao;
     private final JobCategoryDao jobCategoryDao;
     private final MapperFacade mapperFacade;
+    private final LocationDao locationDao;
 
     @Autowired
-    public JobService(JobDao jobDao, UserDao userDao, JobAssignmentDao assignmentDao, JobCategoryDao jobCategoryDao, MapperFacade mapperFacade) {
+    public JobService(JobDao jobDao, UserDao userDao, JobAssignmentDao assignmentDao, JobCategoryDao jobCategoryDao, MapperFacade mapperFacade, LocationDao locationDao) {
         this.jobDao = jobDao;
         this.userDao = userDao;
         this.assignmentDao = assignmentDao;
         this.jobCategoryDao = jobCategoryDao;
         this.mapperFacade = mapperFacade;
+        this.locationDao = locationDao;
     }
 
     public ClientJobResponse getJobById(int clientId, int jobId) {
@@ -84,7 +91,7 @@ public class JobService {
         Job job = mapperFacade.map(jobRequest, Job.class);
         job.setClient(user.get());
         job.setJobCategory(category.get());
-        job.setJobStatus(JobStatus.IN_PROGRESS);
+        job.setJobStatus(JobStatus.DRAFT);
 
         return mapperFacade.map(jobDao.save(job), JobResponse.class);
     }
@@ -152,5 +159,54 @@ public class JobService {
         }
         job.get().setJobStatus(JobStatus.WAITING_FOR_EXPERT);
         //TODO send notifications to users
+    }
+
+    @Transactional
+    public void updateJob(int clientId, int jobId, JobResponse clientJobResponse) {
+        Optional<Job> job = jobDao.findById(jobId);
+        if (!job.isPresent())
+            throw new HttpHandyManException("Job not found", HttpStatus.NOT_FOUND.value());
+
+        if (job.get().getClient().getId() != clientId)
+            throw new HttpHandyManException("You are not allowed to update this job details", HttpStatus.FORBIDDEN.value());
+
+        if (job.get().getJobStatus() == JobStatus.COMPLETED || job.get().getJobStatus() == JobStatus.DELETED || job.get().getJobStatus() == JobStatus.WAITING_FOR_EXPERT)
+            throw new HttpHandyManException("You are not allowed to update this job details", HttpStatus.FORBIDDEN.value());
+
+        Job updatedJob = job.get();
+        Job clientJob = mapperFacade.map(clientJobResponse, Job.class);
+        if (clientJob.getJobStatus() != null)
+            updatedJob.setJobStatus(clientJob.getJobStatus());
+        if (clientJob.getJobCategory() != null)
+            updatedJob.setJobCategory(clientJob.getJobCategory());
+        if (clientJob.getArrivalDate() != 0)
+            updatedJob.setArrivalDate(clientJob.getArrivalDate());
+        if (clientJob.getDescription() != null)
+            updatedJob.setDescription(clientJob.getDescription());
+        if (clientJob.getLocation() != null)
+            updatedJob.setLocation(clientJob.getLocation());
+
+        jobDao.save(updatedJob);
+    }
+
+    @Transactional
+    public void uploadPhotoToJob(int jobId, int clientId, MultipartFile inputImage) {
+        Optional<Job> job = jobDao.findById(jobId);
+        if (!job.isPresent())
+            throw new HttpHandyManException("Job not found", HttpStatus.NOT_FOUND.value());
+
+        if (job.get().getClient().getId() != clientId)
+            throw new HttpHandyManException("You are not allowed to update this job details", HttpStatus.FORBIDDEN.value());
+
+        if (job.get().getJobStatus() == JobStatus.COMPLETED || job.get().getJobStatus() == JobStatus.DELETED || job.get().getJobStatus() == JobStatus.WAITING_FOR_EXPERT)
+            throw new HttpHandyManException("You are not allowed to update this job details", HttpStatus.FORBIDDEN.value());
+
+        try {
+            Image image = ImageIO.read(inputImage.getInputStream());
+            //TODO save image in amazon
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new HttpHandyManException("Failed to store photo", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 }

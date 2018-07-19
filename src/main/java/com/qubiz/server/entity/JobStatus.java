@@ -7,8 +7,9 @@ package com.qubiz.server.entity;
  ******************************
 */
 public enum JobStatus {
+    DRAFT,
     IN_PROGRESS,
+    WAITING_FOR_EXPERT,
     COMPLETED,
-    DELETED,
-    WAITING_FOR_EXPERT
+    DELETED
 }
