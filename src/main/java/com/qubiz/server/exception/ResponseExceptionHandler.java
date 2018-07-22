@@ -39,7 +39,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     protected void defaultHandler(RuntimeException e, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong. Please login again !");
+        response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong. Please try again !");
     }
 
 }
