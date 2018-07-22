@@ -1,5 +1,6 @@
 package com.qubiz.server.config;
 
+import com.qubiz.server.entity.dto.PhotoDto;
 import com.qubiz.server.entity.dto.request.AddJobAssignmentRequest;
 import com.qubiz.server.entity.dto.request.AddJobRequest;
 import com.qubiz.server.entity.dto.response.JobAssignmentResponse;
@@ -12,6 +13,7 @@ import com.qubiz.server.entity.model.Job;
 import com.qubiz.server.entity.model.JobAssignment;
 import com.qubiz.server.entity.model.JobCategory;
 import com.qubiz.server.entity.model.Location;
+import com.qubiz.server.entity.model.Photo;
 import com.qubiz.server.entity.model.Role;
 import com.qubiz.server.entity.model.User;
 import ma.glasnost.orika.CustomMapper;
@@ -73,6 +75,10 @@ public class MappingConfig extends ConfigurableMapper {
                 .byDefault()
                 .register();
         factory.classMap(AddJobAssignmentRequest.class, JobAssignment.class)
+                .byDefault()
+                .register();
+
+        factory.classMap(Photo.class, PhotoDto.class)
                 .byDefault()
                 .register();
 
