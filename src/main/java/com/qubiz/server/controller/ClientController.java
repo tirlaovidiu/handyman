@@ -1,6 +1,7 @@
 package com.qubiz.server.controller;
 
 import com.qubiz.server.config.UserDetails;
+import com.qubiz.server.entity.dto.PhotoDto;
 import com.qubiz.server.entity.dto.request.AddJobRequest;
 import com.qubiz.server.entity.dto.response.ClientJobResponse;
 import com.qubiz.server.entity.dto.response.JobResponse;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,6 +59,20 @@ public class ClientController {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         jobService.uploadPhotoToJob(jobId, userDetails.getClientId(), image);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("/jobs/{jobId}/photos/{photoId}")
+    public ResponseEntity deletePhoto(@PathVariable("jobId") int jobId, @PathVariable("photoId") int photoId) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        jobService.deletePhotoFromJob(jobId, photoId, userDetails.getClientId());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/jobs/{jobId}/photos/{photoId}")
+    public ResponseEntity getPhotoById(@PathVariable("jobId") int jobId, @PathVariable("photoId") int photoId) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        PhotoDto photoDto = jobService.getPhotoById(jobId, photoId, userDetails.getClientId());
+        return ResponseEntity.status(HttpStatus.OK).body(photoDto);
     }
 
     @PutMapping("/jobs/{id}")

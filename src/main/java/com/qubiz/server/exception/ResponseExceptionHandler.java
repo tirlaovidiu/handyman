@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +36,11 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = HttpHandyManException.class)
     protected void exceptionHandler(HttpHandyManException e, HttpServletResponse response, HttpServletRequest request) throws IOException {
         response.sendError(e.getCode(), e.getMessage());
+    }
+
+    @ExceptionHandler(value = MaxUploadSizeExceededException.class)
+    protected void uploadExceptionHandler(MaxUploadSizeExceededException e, HttpServletResponse response, HttpServletRequest request) throws IOException {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Max file size limit exceed, file must be under 1MB");
     }
 
     @ExceptionHandler(value = Exception.class)

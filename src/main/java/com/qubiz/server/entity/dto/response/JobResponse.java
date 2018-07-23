@@ -2,7 +2,10 @@ package com.qubiz.server.entity.dto.response;
 
 import com.qubiz.server.entity.JobStatus;
 import com.qubiz.server.entity.dto.LocationDto;
+import com.qubiz.server.entity.dto.PhotoDto;
 import com.qubiz.server.entity.dto.UserProfileDto;
+
+import java.util.List;
 
 /*
  ******************************
@@ -18,6 +21,7 @@ public class JobResponse {
     private long arrivalDate;
     private LocationDto jobLocation;
     private JobStatus jobStatus;
+    private List<PhotoDto> photos;
 
     public JobResponse() {
     }
@@ -76,5 +80,13 @@ public class JobResponse {
 
     public void setJobStatus(JobStatus jobStatus) {
         this.jobStatus = jobStatus;
+    }
+
+    public List<PhotoDto> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<PhotoDto> photos) {
+        this.photos = photos;
     }
 }

@@ -8,7 +8,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /*
  ******************************
@@ -36,6 +39,9 @@ public class Job {
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Location location;
+
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Photo> photos = new ArrayList<>();
 
     private JobStatus jobStatus;
 
@@ -100,5 +106,13 @@ public class Job {
 
     public long getTimeStamp() {
         return timeStamp;
+    }
+
+    public List<Photo> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<Photo> photos) {
+        this.photos = photos;
     }
 }
