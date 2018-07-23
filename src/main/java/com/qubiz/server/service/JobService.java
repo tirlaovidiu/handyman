@@ -11,6 +11,7 @@ import com.qubiz.server.entity.dto.response.JobResponse;
 import com.qubiz.server.entity.model.Job;
 import com.qubiz.server.entity.model.JobAssignment;
 import com.qubiz.server.entity.model.JobCategory;
+import com.qubiz.server.entity.model.Location;
 import com.qubiz.server.entity.model.Photo;
 import com.qubiz.server.entity.model.User;
 import com.qubiz.server.exception.BadAuthenticationException;
@@ -35,6 +36,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -188,14 +190,28 @@ public class JobService {
         Job clientJob = mapperFacade.map(clientJobResponse, Job.class);
         if (clientJob.getJobStatus() != null)
             updatedJob.setJobStatus(clientJob.getJobStatus());
-        if (clientJob.getJobCategory() != null)
-            updatedJob.setJobCategory(clientJob.getJobCategory());
-        if (clientJob.getArrivalDate() != 0)
+        if (clientJob.getJobCategory() != null) {
+            Optional<JobCategory> jobCategory = jobCategoryDao.findById(clientJob.getJobCategory().getId());
+            if (!jobCategory.isPresent()) {
+                throw new HttpHandyManException("No job category found", HttpStatus.BAD_REQUEST.value());
+            }
+            updatedJob.setJobCategory(jobCategory.get());
+        }
+        if (clientJob.getArrivalDate() != 0) {
+            Calendar currentTime = Calendar.getInstance();
+            if (clientJob.getArrivalDate() < currentTime.getTimeInMillis())
+                throw new HttpHandyManException("Arrival date can't be set in the past", HttpStatus.BAD_REQUEST.value());
             updatedJob.setArrivalDate(clientJob.getArrivalDate());
+        }
         if (clientJob.getDescription() != null)
             updatedJob.setDescription(clientJob.getDescription());
-        if (clientJob.getLocation() != null)
-            updatedJob.setLocation(clientJob.getLocation());
+        if (clientJob.getLocation() != null) {
+            Location location = job.get().getLocation();
+            location.setAddressName(clientJob.getLocation().getAddressName());
+            location.setLatitude(clientJob.getLocation().getLatitude());
+            location.setLongitude(clientJob.getLocation().getLongitude());
+            updatedJob.setLocation(location);
+        }
 
         jobDao.save(updatedJob);
     }
