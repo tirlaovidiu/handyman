@@ -36,7 +36,7 @@ public class ExpertController {
     }
 
     @GetMapping("/jobs")
-    public ResponseEntity getJobById(@RequestParam("long") double longitude, @RequestParam("lat") double latitude, @RequestParam(value = "dist", required = false, defaultValue = "1") double distance, @RequestParam(value = "size", defaultValue = "10", required = false) int pageSize, @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
+    public ResponseEntity getJobs(@RequestParam("long") double longitude, @RequestParam("lat") double latitude, @RequestParam(value = "dist", required = false, defaultValue = "1") double distance, @RequestParam(value = "size", defaultValue = "10", required = false) int pageSize, @RequestParam(value = "page", required = false, defaultValue = "0") int page) {
         if (distance > 2.0 || distance < 0)
             distance = 1;
         if (page < 0)
@@ -46,6 +46,12 @@ public class ExpertController {
 
         List<JobResponse> jobResponses = jobService.getJobsByCoordinates(latitude, longitude, distance, page, pageSize);
         return ResponseEntity.status(HttpStatus.OK).body(jobResponses);
+    }
+
+    @GetMapping("/jobs/{id}")
+    public ResponseEntity getJobById(@PathVariable("id") int jobId) {
+        JobResponse jobResponse = jobService.getExpertJobById(jobId);
+        return ResponseEntity.status(HttpStatus.OK).body(jobResponse);
     }
 
     @PostMapping("/jobs/{id}")

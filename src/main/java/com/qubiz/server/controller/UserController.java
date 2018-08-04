@@ -2,7 +2,6 @@ package com.qubiz.server.controller;
 
 import com.qubiz.server.config.UserDetails;
 import com.qubiz.server.entity.dto.UserProfileDto;
-import com.qubiz.server.exception.BadAuthenticationException;
 import com.qubiz.server.service.JobService;
 import com.qubiz.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity getMyProfile() throws BadAuthenticationException {
+    public ResponseEntity getMyProfile() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         UserProfileDto userProfile = userService.getPersonalProfile(userDetails.getClientId());

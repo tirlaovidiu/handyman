@@ -19,7 +19,6 @@ import com.qubiz.server.exception.HttpHandyManException;
 import com.qubiz.server.repository.JobAssignmentDao;
 import com.qubiz.server.repository.JobCategoryDao;
 import com.qubiz.server.repository.JobDao;
-import com.qubiz.server.repository.LocationDao;
 import com.qubiz.server.repository.PhotoDao;
 import com.qubiz.server.repository.UserDao;
 import ma.glasnost.orika.MapperFacade;
@@ -36,6 +35,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -57,18 +57,16 @@ public class JobService {
     private final JobAssignmentDao assignmentDao;
     private final JobCategoryDao jobCategoryDao;
     private final MapperFacade mapperFacade;
-    private final LocationDao locationDao;
     private final PhotoDao photoDao;
     private final AmazonClient amazonClient;
 
     @Autowired
-    public JobService(JobDao jobDao, UserDao userDao, JobAssignmentDao assignmentDao, JobCategoryDao jobCategoryDao, MapperFacade mapperFacade, LocationDao locationDao, AmazonClient amazonClient, PhotoDao photoDao) {
+    public JobService(JobDao jobDao, UserDao userDao, JobAssignmentDao assignmentDao, JobCategoryDao jobCategoryDao, MapperFacade mapperFacade, AmazonClient amazonClient, PhotoDao photoDao) {
         this.jobDao = jobDao;
         this.userDao = userDao;
         this.assignmentDao = assignmentDao;
         this.jobCategoryDao = jobCategoryDao;
         this.mapperFacade = mapperFacade;
-        this.locationDao = locationDao;
         this.amazonClient = amazonClient;
         this.photoDao = photoDao;
     }
@@ -96,10 +94,13 @@ public class JobService {
     public JobResponse addJob(int clientId, AddJobRequest jobRequest) {
         //TODO validate jobRequest
         Optional<User> user = userDao.findById(clientId);
-        user.orElseThrow(() -> new BadAuthenticationException("No user match for your session"));
+        if (!user.isPresent())
+            throw new BadAuthenticationException("No user match for your session");
 
         Optional<JobCategory> category = jobCategoryDao.findById(jobRequest.getJobCategoryId());
-        category.orElseThrow(() -> new HttpHandyManException("Invalid selected category", HttpStatus.BAD_REQUEST.value()));
+
+        if (!category.isPresent())
+            throw new HttpHandyManException("Invalid selected category", HttpStatus.BAD_REQUEST.value());
 
         Job job = mapperFacade.map(jobRequest, Job.class);
         job.setClient(user.get());
@@ -111,9 +112,18 @@ public class JobService {
 
     public List<ClientJobResponse> getJobs(int clientId) {
         Optional<User> user = userDao.findById(clientId);
-        user.orElseThrow(() -> new BadAuthenticationException("No user match for your session"));
+        if (!user.isPresent())
+            throw new BadAuthenticationException("No user match for your session");
 
-        return mapperFacade.mapAsList(jobDao.findJobsByClient(user.get()), ClientJobResponse.class);
+        List<Job> jobs = jobDao.findJobsByClient(user.get());
+        List<ClientJobResponse> jobResponses = new ArrayList<>(jobs.size());
+        for (Job job : jobs) {
+            JobResponse jobResponse = mapperFacade.map(job, JobResponse.class);
+            List<JobAssignmentResponse> assignmentResponses = mapperFacade.mapAsList(assignmentDao.findAllByJob(job), JobAssignmentResponse.class);
+            jobResponses.add(new ClientJobResponse(jobResponse, assignmentResponses));
+        }
+
+        return jobResponses;
     }
 
     public List<JobResponse> getJobsByCoordinates(double latitude, double longitude, double distance, int page, int pageSize) {
@@ -165,9 +175,9 @@ public class JobService {
         List<JobAssignment> assignments = assignmentDao.findAllByJob(job.get());
         for (JobAssignment jobAssignment : assignments) {
             if (jobAssignment.equals(expertAssignment.get())) {
-                jobAssignment.setAssignmentStatus(JobAssignmentStatus.REJECTED);
-            } else {
                 jobAssignment.setAssignmentStatus(JobAssignmentStatus.ACCEPTED);
+            } else {
+                jobAssignment.setAssignmentStatus(JobAssignmentStatus.REJECTED);
             }
         }
         job.get().setJobStatus(JobStatus.WAITING_FOR_EXPERT);
@@ -207,6 +217,8 @@ public class JobService {
             updatedJob.setDescription(clientJob.getDescription());
         if (clientJob.getLocation() != null) {
             Location location = job.get().getLocation();
+            if (location == null)
+                location = new Location();
             location.setAddressName(clientJob.getLocation().getAddressName());
             location.setLatitude(clientJob.getLocation().getLatitude());
             location.setLongitude(clientJob.getLocation().getLongitude());
@@ -217,7 +229,7 @@ public class JobService {
     }
 
     @Transactional
-    public void uploadPhotoToJob(int jobId, int clientId, MultipartFile inputImage) {
+    public PhotoDto uploadPhotoToJob(int jobId, int clientId, MultipartFile inputImage) {
         Optional<Job> job = jobDao.findById(jobId);
         if (!job.isPresent())
             throw new HttpHandyManException("Job not found", HttpStatus.NOT_FOUND.value());
@@ -253,11 +265,14 @@ public class JobService {
                 image = resizedImg;
             }
             String fileName = amazonClient.uploadPhoto(image, jobId);
+
             Photo photo = new Photo();
             photo.setFileName(fileName);
             photo.setAwsUrl(amazonClient.getEndpointUrl() + "/" + fileName);
             photo.setJob(job.get());
             job.get().getPhotos().add(photo);
+
+            return mapperFacade.map(photo, PhotoDto.class);
         } catch (IOException e) {
             e.printStackTrace();
             throw new HttpHandyManException("Failed to store photo", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -295,9 +310,6 @@ public class JobService {
         if (job.get().getClient().getId() != clientId)
             throw new HttpHandyManException("You are not allowed to update this job details", HttpStatus.FORBIDDEN.value());
 
-        if (job.get().getJobStatus() == JobStatus.COMPLETED || job.get().getJobStatus() == JobStatus.DELETED || job.get().getJobStatus() == JobStatus.WAITING_FOR_EXPERT)
-            throw new HttpHandyManException("You are not allowed to update this job details", HttpStatus.FORBIDDEN.value());
-
         if (!photo.isPresent()) {
             throw new HttpHandyManException("Photo not found", HttpStatus.NOT_FOUND.value());
         }
@@ -306,5 +318,12 @@ public class JobService {
             throw new HttpHandyManException("You are not allowed to view this photo", HttpStatus.FORBIDDEN.value());
 
         return mapperFacade.map(photo.get(), PhotoDto.class);
+    }
+
+    public JobResponse getExpertJobById(int jobId) {
+        Optional<Job> job = jobDao.findById(jobId);
+        if (!job.isPresent())
+            throw new HttpHandyManException("Job not found", HttpStatus.NOT_FOUND.value());
+        return mapperFacade.map(job.get(), JobResponse.class);
     }
 }

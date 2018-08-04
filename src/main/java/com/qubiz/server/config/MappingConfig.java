@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 */
 @Component
 public class MappingConfig extends ConfigurableMapper {
+    @Override
     protected void configure(MapperFactory factory) {
         factory.classMap(User.class, UserProfileDto.class)
                 .exclude("id")

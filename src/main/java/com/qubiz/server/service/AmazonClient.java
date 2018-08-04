@@ -3,8 +3,10 @@ package com.qubiz.server.service;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,12 +46,12 @@ public class AmazonClient {
         AWSCredentials credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
         this.amazonS3 = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withRegion("eu-east")
+                .withRegion(Regions.US_EAST_2)
                 .build();
     }
 
     public String uploadPhoto(BufferedImage image, int jobId) throws IOException {
-        String fileName = jobId + "/" + UUID.randomUUID();
+        String fileName = "jobs/" + jobId + "/" + UUID.randomUUID() + ".PNG";
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, "PNG", os);
         byte[] buffer = os.toByteArray();
@@ -57,7 +59,8 @@ public class AmazonClient {
         ObjectMetadata meta = new ObjectMetadata();
         meta.setContentLength(buffer.length);
         meta.setContentType("image/png");
-        amazonS3.putObject(new PutObjectRequest(bucketName, fileName, is, meta));
+        amazonS3.putObject(new PutObjectRequest(bucketName, fileName, is, meta)
+                .withCannedAcl(CannedAccessControlList.PublicRead));
         return fileName;
     }
 

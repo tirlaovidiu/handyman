@@ -57,8 +57,8 @@ public class ClientController {
     @PostMapping("/jobs/{id}/photos")
     public ResponseEntity uploadPhoto(@PathVariable("id") int jobId, @RequestParam("image") MultipartFile image) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        jobService.uploadPhotoToJob(jobId, userDetails.getClientId(), image);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        PhotoDto photoDto = jobService.uploadPhotoToJob(jobId, userDetails.getClientId(), image);
+        return ResponseEntity.status(HttpStatus.OK).body(photoDto);
     }
 
     @DeleteMapping("/jobs/{jobId}/photos/{photoId}")
